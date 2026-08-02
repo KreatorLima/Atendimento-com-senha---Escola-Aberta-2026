@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Atendente - SESI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { sesi: { red: '#E30613', redHover: '#C4020E', navy: '#0A192F', bg: '#F8FAFC' } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-sesi-bg font-sans min-h-screen text-slate-800">
+
+    <header class="bg-sesi-navy text-white px-6 py-3.5 flex justify-between items-center shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="bg-sesi-red text-white px-3 py-1 rounded font-black text-2xl tracking-tighter">SESI</div>
+            <div>
+                <h1 class="font-bold text-white text-base leading-tight">Painel de Chamada de Senhas</h1>
+                <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Sistema Online
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <div class="font-bold text-white text-sm">Atendente SESI</div>
+                <div class="text-xs text-slate-300">Secretaria / Guichê 01</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-sesi-red text-white font-black flex items-center justify-center text-sm border-2 border-white/20">AS</div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <div class="mb-6">
+            <input type="text" id="inputBusca" onkeyup="filtrarSenhas()" placeholder="Buscar por senha, responsável, aluno ou serviço..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-sesi-red outline-none shadow-sm">
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-8">
+            <button onclick="filtrarStatus('todas')" class="tab-btn active px-4 py-2 rounded-xl text-xs font-bold transition bg-sesi-navy text-white shadow-sm">Todas</button>
+            <button onclick="filtrarStatus('aguardando')" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">Aguardando</button>
+            <button onclick="filtrarStatus('chamada')" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">Em Atendimento</button>
+            <button onclick="filtrarStatus('finalizada')" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 border border-slate-200 hover:bg-slate-50">Finalizadas</button>
+        </div>
+
+        <div id="gridSenhas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/atendimento.js') }}"></script>
+</body>
+</html>

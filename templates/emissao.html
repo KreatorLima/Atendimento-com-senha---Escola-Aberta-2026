@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emissão de Senhas - SESI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sesi: { red: '#E30613', redHover: '#C4020E', navy: '#0A192F', bg: '#F8FAFC' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #comprovanteImpressao, #comprovanteImpressao * { visibility: visible; }
+            #comprovanteImpressao { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-sesi-bg font-sans min-h-screen flex flex-col md:flex-row">
+
+    <aside class="w-full md:w-80 bg-sesi-navy text-white p-6 flex flex-col justify-between shadow-xl">
+        <div>
+            <div class="flex items-center space-x-3 mb-8 border-b border-slate-700 pb-5">
+                <div class="bg-sesi-red text-white font-black text-2xl tracking-tighter px-3 py-1 rounded">SESI</div>
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Atendimento</h2>
+                    <p class="text-[10px] text-slate-400">Rede Escolar</p>
+                </div>
+            </div>
+
+            <div class="bg-sesi-red rounded-xl p-5 text-center mb-6 shadow-lg border border-red-500">
+                <span class="text-[11px] uppercase tracking-widest text-red-100 font-bold">Última Senha Gerada</span>
+                <div id="senhaDestaque" class="text-4xl font-black my-1 text-white">--</div>
+                <div id="tipoDestaque" class="text-xs font-bold text-red-100 uppercase tracking-wide">Aguardando cadastro...</div>
+            </div>
+
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Últimos Cadastros</h3>
+            <ul id="listaHistorico" class="space-y-2">
+                <li class="text-xs text-slate-500 italic">Nenhuma senha emitida ainda.</li>
+            </ul>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-800 text-[11px] text-slate-400 text-center">Sistema Escolar • SESI</div>
+    </aside>
+
+    <main class="flex-1 p-6 md:p-10 max-w-2xl mx-auto w-full">
+        <header class="mb-8 border-b border-slate-200 pb-4">
+            <span class="text-xs font-bold text-sesi-red uppercase tracking-widest">Secretaria & Atendimento</span>
+            <h1 class="text-3xl font-extrabold text-slate-800">Emissão de Senhas</h1>
+        </header>
+
+        <section class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 border-t-4 border-t-sesi-red">
+            <form id="formCadastro" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nome do Pai / Mãe / Responsável</label>
+                    <input type="text" id="nomeResponsavel" required placeholder="Ex: Carlos Andrade" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sesi-red outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Nome do Aluno(a)</label>
+                    <input type="text" id="nomeAluno" required placeholder="Ex: Mariana Andrade" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sesi-red outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Tipo de Atendimento</label>
+                    <select id="tipoAtendimento" required onchange="verificarOutrosOpcao()" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sesi-red outline-none bg-white text-slate-700 text-sm">
+                        <option value="" disabled selected>Selecione o serviço...</option>
+                        <option value="Matrícula / Rematrícula (M)" data-prefixo="M">Matrícula / Rematrícula (M)</option>
+                        <option value="Secretaria Escola SESI (S)" data-prefixo="S">Secretaria Escola SESI (S)</option>
+                        <option value="Financeiro / Mensalidades (F)" data-prefixo="F">Financeiro / Mensalidades (F)</option>
+                        <option value="Coordenação Pedagógica (C)" data-prefixo="C">Coordenação Pedagógica (C)</option>
+                        <option value="Carteirinha / Uniforme (U)" data-prefixo="U">Carteirinha / Uniforme (U)</option>
+                        <option value="Outros Assuntos (O)" data-prefixo="O">Outros Assuntos (O)</option>
+                    </select>
+                </div>
+                <div id="campoOutrosContainer" class="hidden">
+                    <label class="block text-xs font-bold text-sesi-red uppercase tracking-wider mb-2">Especifique o Assunto</label>
+                    <input type="text" id="especificacaoOutros" placeholder="Ex: Transferência, reunião..." class="w-full px-4 py-3 border border-sesi-red rounded-lg focus:ring-2 focus:ring-sesi-red outline-none text-sm bg-red-50/30">
+                </div>
+                <button type="submit" class="w-full bg-sesi-red hover:bg-sesi-redHover text-white font-bold py-3.5 rounded-lg transition shadow-md uppercase tracking-wider text-sm">
+                    Gerar e Imprimir Senha
+                </button>
+            </form>
+        </section>
+    </main>
+
+    <div id="comprovanteImpressao" class="hidden text-center p-6 max-w-xs mx-auto font-mono text-black">
+        <h2 class="text-2xl font-black">SESI</h2>
+        <p class="text-[11px] font-bold uppercase border-b-2 border-black pb-2 mb-3">Escola SESI - Atendimento</p>
+        <div class="my-4">
+            <span class="text-xs uppercase font-bold block">Sua Senha</span>
+            <span id="printSenha" class="text-5xl font-black block my-1">--000</span>
+            <span id="printTipo" class="text-xs font-bold block uppercase border-t border-b border-black py-1.5 my-2">---</span>
+        </div>
+        <div class="text-left text-xs space-y-1 my-3">
+            <p><strong>Responsável:</strong> <span id="printResponsavel">---</span></p>
+            <p><strong>Aluno(a):</strong> <span id="printAluno">---</span></p>
+            <p><strong>Data/Hora:</strong> <span id="printDataHora">---</span></p>
+        </div>
+        <p class="text-[10px] italic mt-4 border-t border-black pt-2">Aguarde a chamada no painel principal.</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/emissao.js') }}"></script>
+</body>
+</html>

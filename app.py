@@ -31,6 +31,12 @@ def handle_connect():
 @socketio.on('emitir_senha')
 def handle_emitir_senha(dados):
     prefixo = dados.get('prefixo', 'S')
+    
+    # Validacao de prefixos
+    if prefixo not in contadores:
+        emit('erro', {'mensagem': 'Prefixo inválido'})
+        return
+
     numero = contadores[prefixo]
     codigo_senha = f"{prefixo}-{str(numero).zfill(3)}"
     contadores[prefixo] += 1

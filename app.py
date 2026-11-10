@@ -7,6 +7,14 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Estruturas em memória para armazenar o estado das senhas
 senhas = []
+tipos_atendimento = {
+    'M': 'Matrícula / Rematrícula (M)',
+    'S': 'Secretaria Escola SESI (S)',
+    'F': 'Financeiro / Mensalidades (F)',
+    'C': 'Coordenação Pedagógica (C)',
+    'U': 'Carteirinha / Uniforme (U)',
+    'O': 'Outros Assuntos (O)'
+}
 contadores = {'M': 1, 'S': 1, 'F': 1, 'C': 1, 'U': 1, 'O': 1}
 
 # --- ROTAS DE NAVEGAÇÃO ---
@@ -30,10 +38,16 @@ def handle_connect():
 
 @socketio.on('emitir_senha')
 def handle_emitir_senha(dados):
-    prefixo = dados.get('prefixo', 'S')
-    
+    prefixo = dados.get('tipo')
+
     # Validacao de prefixos
     if prefixo not in contadores:
+        emit('erro', {'mensagem': 'Prefixo inválido'})
+        return
+
+    # Validar tipo
+    tipo = tipos_atendimento.get(prefixo)
+    if tipo is None:
         emit('erro', {'mensagem': 'Prefixo inválido'})
         return
 
@@ -44,7 +58,7 @@ def handle_emitir_senha(dados):
     nova_senha = {
         'id': len(senhas) + 1,
         'senha': codigo_senha,
-        'tipo': dados.get('tipo'),
+        'tipo': tipo,
         'especificacao': dados.get('especificacao', ''),
         'responsavel': dados.get('responsavel'),
         'aluno': dados.get('aluno'),

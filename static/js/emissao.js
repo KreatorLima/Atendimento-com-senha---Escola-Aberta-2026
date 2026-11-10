@@ -22,7 +22,6 @@ formCadastro.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const selectTipo = document.getElementById('tipoAtendimento');
-    const prefixo = selectTipo.options[selectTipo.selectedIndex].getAttribute('data-prefixo');
 
     // Captura a data completa (Dia/Mês/Ano e Hora:Minuto)
     const agora = new Date();
@@ -32,7 +31,6 @@ formCadastro.addEventListener('submit', function(e) {
         responsavel: document.getElementById('nomeResponsavel').value,
         aluno: document.getElementById('nomeAluno').value,
         tipo: selectTipo.value,
-        prefixo: prefixo,
         especificacao: especificacaoOutros.value,
         dataHora: dataHoraFormatada
     };
